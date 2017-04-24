@@ -69,7 +69,12 @@ spr2txt.main = function() {
     });
 
     spr2txt.appendEventByClassName('color', 'click', function(){
+        var elements = document.getElementsByClassName('checked');
+        for(var i=0; i < elements.length; i++) {
+            elements[i].classList.remove('checked');
+        }
         spr2txt.color = this.getAttribute('data-color');
+        this.classList.add('checked');
     });
 
     spr2txt.renderColor('pixel');

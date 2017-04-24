@@ -19,3 +19,9 @@
     min-height: 32px;
     float: left;
 }
+
+.checked {
+    border: 2px solid;
+    min-width: 28px !important;
+    min-height: 28px !important;
+}
