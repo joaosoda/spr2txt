@@ -68,6 +68,10 @@ spr2txt.main = function() {
         click = false;
     });
 
+    spr2txt.appendEventByClassName('grid', 'mouseleave', function(){
+        click = false;
+    });
+
     spr2txt.appendEventByClassName('color', 'click', function(){
         var elements = document.getElementsByClassName('checked');
         for(var i=0; i < elements.length; i++) {
