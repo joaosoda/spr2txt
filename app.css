@@ -1,0 +1,21 @@
+.grid {
+    border: 1px solid gray;
+    width: 256px;
+    height: 256px
+}
+
+.pixel {
+    width: 32px;
+    height: 32px;
+    float: left;
+}
+
+.palette {
+    width: 256px;
+}
+
+.color {
+    min-width: 32px;
+    min-height: 32px;
+    float: left;
+}
