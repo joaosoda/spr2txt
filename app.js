@@ -50,25 +50,42 @@ spr2txt.changeBackgroundColor = function(element, bit) {
     element.style.backgroundColor = spr2txt.colorTranslate(bit);
 };
 
+spr2txt.normalizePixelCoord = function (x,p) { return (Math.floor((x-1)/p) * p) };
+
+spr2txt.changeColor = function(event, bit) {
+    var x = spr2txt.normalizePixelCoord(event.clientX, 32);
+    var y = spr2txt.normalizePixelCoord(event.clientY, 32);
+
+    var ctx = event.target.getContext("2d");
+    ctx.fillStyle=spr2txt.colorTranslate(bit);
+    ctx.fillRect(x,y,32,32);
+};
+
+spr2txt.clean = function(element, bit) {
+    var ctx = element.getContext("2d");
+    ctx.fillStyle=spr2txt.colorTranslate(bit);
+    ctx.fillRect(0,0,256,256);
+}
+
 spr2txt.main = function() {
     var click = false;
-    spr2txt.appendEventByClassName('pixel', 'mousedown', function(){
+    var canvas = document.getElementById('canvas');
+
+    canvas.addEventListener('mousedown', function(that){
         click = true;
-        spr2txt.changeBackgroundColor(this, spr2txt.color);
-        this.setAttribute('data-color', spr2txt.color);
+        spr2txt.changeColor(that, spr2txt.color);
     });
 
-    spr2txt.appendEventByClassName('pixel', 'mousemove', function(){
+    canvas.addEventListener('mousemove', function(that){
         if(!click) return false;
-        spr2txt.changeBackgroundColor(this, spr2txt.color);
-        this.setAttribute('data-color', spr2txt.color);
+        spr2txt.changeColor(that, spr2txt.color);
     });
 
-    spr2txt.appendEventByClassName('pixel', 'mouseup', function(){
+    canvas.addEventListener('mouseup', function(that){
         click = false;
     });
 
-    spr2txt.appendEventByClassName('grid', 'mouseleave', function(){
+    canvas.addEventListener('mouseleave', function(that){
         click = false;
     });
 
@@ -81,6 +98,11 @@ spr2txt.main = function() {
         this.classList.add('checked');
     });
 
-    spr2txt.renderColor('pixel');
+    spr2txt.clean(canvas, '0000');
     spr2txt.renderColor('color');
+
+    /*var a = function (x,p) { return (Math.floor((x-1)/p) * p) + 1 };
+    var b = function (x,y,p) { return [a(x,p),a(y,p)]; };
+    var c = function(ang) { return Math.sin(ang * Math.PI/180) };
+    var d = function(ang) { return (sinPer(ang) + 1)/2 };*/
 };

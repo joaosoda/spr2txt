@@ -1,3 +1,7 @@
+body {
+    margin: 0px;
+}
+
 .grid {
     border: 1px solid gray;
     width: 256px;
