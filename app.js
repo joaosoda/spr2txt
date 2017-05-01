@@ -1,4 +1,5 @@
 var spr2txt = window.spr2txt || {};
+
 spr2txt.colorDict = {
     "0000": "#000000", "0001": "#1d2b53",
     "0010": "#7e2553", "0011": "#008751",
@@ -11,26 +12,18 @@ spr2txt.colorDict = {
 };
 spr2txt.color = "0000";
 
+spr2txt.mem = [];
+
+spr2txt.pointer = 0;
+
+spr2txt.spritesLoc = {x:0,y:0};
+
 spr2txt.appendEventByClassName = function(className, eventName, callback) {
     var elements = document.getElementsByClassName(className);
     for(var i=0; i < elements.length; i++) {
         elements[i].addEventListener(eventName, callback);
     }
     return elements;
-};
-
-spr2txt.removeEventListener = function(className, eventName, callback) {
-    var elements = document.getElementsByClassName(className);
-    for(var i=0; i < elements.length; i++) {
-        elements[i].removeEventListener(eventName, callback);
-    }
-    return elements;
-};
-
-spr2txt.appendEventById = function(id, eventName, callback) {
-    var element = document.getElementsById(id);
-    element.addEventListener(eventName, callback);
-    return element;
 };
 
 spr2txt.colorTranslate = function(bit) {
@@ -56,21 +49,61 @@ spr2txt.changeColor = function(event, bit) {
     var x = spr2txt.normalizePixelCoord(event.clientX, 32);
     var y = spr2txt.normalizePixelCoord(event.clientY, 32);
 
+    spr2txt.updateSpriteGrid(x/8,y/8,bit);
+
+    spr2txt.setColorAddress(x/32,y/32,bit);
+
     var ctx = event.target.getContext("2d");
     ctx.fillStyle=spr2txt.colorTranslate(bit);
     ctx.fillRect(x,y,32,32);
 };
 
-spr2txt.clean = function(element, bit) {
-    var ctx = element.getContext("2d");
+spr2txt.setColorAddress = function(x,y,bit) {
+    var i=spr2txt.pointer+(y*8)+x;
+    spr2txt.mem[i] = bit;
+};
+
+spr2txt.updateSpriteGrid = function(x,y,bit) {
+    var ctx = document.getElementById('sprites').getContext("2d");
+    ctx.fillStyle=spr2txt.colorTranslate(bit);
+    ctx.fillRect(spr2txt.spritesLoc.x+x,spr2txt.spritesLoc.y+y,4,4);
+};
+
+spr2txt.selectSprite = function(event,canvas) {
+    var x = spr2txt.normalizePixelCoord(event.clientX-258, 32)/32;
+    var y = spr2txt.normalizePixelCoord(event.clientY, 32)/32;
+    var i = (y*8)+x;
+
+    spr2txt.pointer=i*64;
+    spr2txt.spritesLoc.x = x*32;
+    spr2txt.spritesLoc.y = y*32;
+
+    spr2txt.changeSprite(canvas)
+};
+
+spr2txt.clean = function(canvas,bit) {
+    var ctx = canvas.getContext("2d");
     ctx.fillStyle=spr2txt.colorTranslate(bit);
     ctx.fillRect(0,0,256,256);
 }
 
+spr2txt.changeSprite = function(canvas) {
+    spr2txt.clean(canvas,'0000');
+    var ctx = canvas.getContext("2d");
+    for(var x=0; x<8; x++) {
+        for(var y=0; y<8; y++) {
+            bit = spr2txt.mem[(y*8)+x+spr2txt.pointer];
+            ctx.fillStyle=spr2txt.colorTranslate(bit);
+            ctx.fillRect(x*32,y*32,32,32);
+        }
+    }
+};
+
 spr2txt.main = function() {
     var click = false;
-    var canvas = document.getElementById('canvas');
 
+    // Canvas events
+    var canvas = document.getElementById('canvas');
     canvas.addEventListener('mousedown', function(that){
         click = true;
         spr2txt.changeColor(that, spr2txt.color);
@@ -89,6 +122,13 @@ spr2txt.main = function() {
         click = false;
     });
 
+    // Sprite grid events
+    var sprites = document.getElementById('sprites');
+    sprites.addEventListener('mousedown', function(that){
+        spr2txt.selectSprite(that,canvas);
+    });
+
+    // Colors events
     spr2txt.appendEventByClassName('color', 'click', function(){
         var elements = document.getElementsByClassName('checked');
         for(var i=0; i < elements.length; i++) {
@@ -97,12 +137,10 @@ spr2txt.main = function() {
         spr2txt.color = this.getAttribute('data-color');
         this.classList.add('checked');
     });
-
-    spr2txt.clean(canvas, '0000');
     spr2txt.renderColor('color');
 
-    /*var a = function (x,p) { return (Math.floor((x-1)/p) * p) + 1 };
-    var b = function (x,y,p) { return [a(x,p),a(y,p)]; };
-    var c = function(ang) { return Math.sin(ang * Math.PI/180) };
-    var d = function(ang) { return (sinPer(ang) + 1)/2 };*/
+    // Memory allocation
+    for(var i=0; i<64*64; i++) {
+        spr2txt.mem[i] = "0000";
+    }
 };
